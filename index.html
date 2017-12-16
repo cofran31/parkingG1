@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Parking Calculador</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+        <style>
+            /* following two viewport lines are equivalent to the meta viewport statement above, needed for Windows */
+            /* see http://www.quirksmode.org/blog/archives/2014/05/html5_dev_conf.html and http://dev.w3.org/csswg/css-device-adapt/ */
+            @-ms-viewport { width: 100vw ; zoom: 100% ; }  @viewport { width: 100vw ; zoom: 100% ; }
+            @-ms-viewport { user-zoom: fixed ; }           @viewport { user-zoom: fixed ; }
+        </style>
+        <script type="text/javascript" src="assets/js/jquery.min.js"></script>
+        <script type="text/javascript" src="assets/js/moment.js"></script>
+        <script type="text/javascript" src="assets/js/bootstrap.js"></script>
+        <script type="text/javascript" src="assets/js/bootstrap-datetimepicker.min.js"></script>
+        <link href="assets/css/bootstrap-theme.css" rel="stylesheet" type="text/css"/>
+        <link href="assets/css/bootstrap.css" rel="stylesheet" type="text/css"/>
+        <link rel="stylesheet" href="assets/css/bootstrap-datetimepicker.min.css" />
+    </head>
+    <body>
+        <div class="form-horizontal">
+            <fieldset>
+                <!-- Form Name -->
+                <legend>&nbsp; &nbsp;Parking Calculator</legend>
+
+                <!-- Select Basic -->
+                <div class="form-group">
+                    <label class="col-md-4 control-label" for="selectbasic">Tipo de Parqueo</label>
+                    <div class="col-md-6">
+                        <select id="selectbasic" name="selectbasic" class="form-control" style="width: 200px !important">
+                            <option value="1">Corto Plazo</option>
+                            <option value="2">Economico</option>
+                            <option value="3">Estandar</option>
+                            <option value="4">Largo Plazo</option>
+                            <option value="5">Nocturno</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Select Basic -->
+                <div class="form-group">
+                    <label class="col-md-4 control-label" for="selectbasic">Fecha y Hora de Entrada:</label>
+                    <div class='col-sm-6'>
+                        <input type='text' class="form-control" id='datetimepicker1' style="width: 200px !important"/>
+                    </div>
+                    <script type="text/javascript">
+                        $(function () {
+                            $('#datetimepicker1').datetimepicker({
+                                minDate: new Date(),
+                                disabledDates: [new Date(-1)]
+                            });
+                        });
+                    </script>
+                </div>
+                <!-- Select Basic -->
+                <div class="form-group">
+                    <label class="col-md-4 control-label" for="selectbasic">Fecha y Hora de Salida:</label>
+                    <div class='col-sm-6'>
+                        <input type='text' class="form-control" id='datetimepicker2' style="width: 200px !important"/>
+                    </div>
+                    <script type="text/javascript">
+                        $(function () {
+                            $('#datetimepicker2').datetimepicker({
+                                minDate: new Date(),
+                                disabledDates: [new Date(-1)]
+                            });
+                        });
+                    </script>
+                </div>
+
+                <!-- Appended Input-->
+                <div class="form-group">
+                    <label class="col-md-4 control-label" for="appendedtext">Costo Total:</label>
+                    <div class="col-md-4">
+                        <div class="input-group">
+                            <input id="appendedtext" name="appendedtext" class="form-control" type="text" disabled style="width: 100px !important">
+                            &nbsp;Bs.
+                        </div>
+                    </div>
+                </div>
+                <!-- Button -->
+                <div class="form-group">
+                    <label class="col-md-4 control-label" for="singlebutton"></label>
+                    <div class="col-md-4">
+                        <button  class="btn btn-primary" onclick="calcular()">Calcular</button>
+                    </div>
+                </div>
+
+            </fieldset>
+        </div>
+
+        <script>
+            function calcular() {
+                document.getElementById('appendedtext').value = "";
+                var tipo = document.getElementById('selectbasic').value;
+                var date_i = $("#datetimepicker1").data("DateTimePicker").date();
+                var date_f = $("#datetimepicker2").data("DateTimePicker").date();
+                if (date_i == "" || date_i == null || date_f == "" || date_f == null)
+                    alert('Debe Ingresar la fecha y hora validas de entrada y salida');
+                else {
+                    if (format(date_f) > format(date_i))
+                    {
+                        var diferencia = calcularTiempoDosFechas(date_i, date_f); // minutos
+                        switch (tipo) {
+                            case "1": // corto plazo
+                                if (diferencia > 240) // minutos
+                                    alert("Este tipo de parqueo solo admite 4hrs como maximo de servicio seleccione otro tipo de parqueo adecuado a su tiempo");
+                                else {
+                                    var costoP = diferencia * 10;
+                                    var costo = costoP / 100;
+                                    document.getElementById('appendedtext').value = costo;
+                                }
+                                break;
+                            case "2": // economico
+                                var diferenciaH = diferencia / 60;   // convertimos a horas
+                                if (diferenciaH < 4 || diferenciaH > 12)
+                                    alert("Este tipo de parqueo admite minimamente 4hrs de uso y maximo 12hrs verifique los tiempos ingresados");
+                                else {
+                                    var costo = diferenciaH.toFixed(0) * 2;
+                                    document.getElementById('appendedtext').value = costo;
+                                }
+                                break;
+                            case "3": // estandar
+                                var diferenciaH = diferencia / 60;
+                                if (diferenciaH < 4 || diferenciaH > 12)
+                                    alert("Este tipo de parqueo admite minimamente 4hrs de uso y maximo 12hrs verifique los tiempos ingresados");
+                                else {
+                                    var costo = diferenciaH.toFixed(0) * 3;
+                                    document.getElementById('appendedtext').value = costo;
+                                }
+                                break;
+                            case "4": // largo plazo
+                                var diferenciaH = diferencia / 60;
+                                if (diferenciaH < 12)
+                                    alert("Este tipo de parqueo admite minimamente 12hrs de uso verifique los tiempos ingresados");
+                                else {
+                                    var calcular = diferenciaH / 12;
+                                    var entera = Math.floor(calcular);
+                                    var decimales = calcular % 1;
+                                    if (decimales > 0)
+                                        entera = entera + 1
+                                    costo = entera * 6;
+                                    document.getElementById('appendedtext').value = costo;
+                                }
+                                break;
+                            case "5": // nocturno
+                                var diferenciaH = diferencia / 60;
+                                var hora_i = format_hora(date_i);
+                                var hora_f = format_hora(date_f);
+                                var minuto_f = format_minuto(date_f);
+                                if (hora_f == 8)
+                                    var cond = 'minuto_f > 0';
+                                if (hora_i < 20 || hora_f > 8 || cond)
+                                    alert("La hora de ingreso es de 8 PM y de salida hasta las 8 AM Del día siguiente");
+                                else {
+                                    var dia_i = format_dia(date_i);
+                                    var dia_f = format_dia(date_f);
+                                    if (dia_i + 1 != dia_f)
+                                        alert("Revise la hora de salida del vehiculo tiene que ser al día siguente");
+                                    else {
+                                        costo = 5;
+                                        document.getElementById('appendedtext').value = costo;
+                                    }
+                                }
+                                break;
+                            default:
+                                alert('nada');
+                        }
+                    } else
+                        alert("Su Fecha y Hora de Ingreso no puede ser mayor o igual a la Feha y Hora de Salida");
+                }
+            }
+            function format(fecha) {
+                var fecha = new Date(fecha);
+                var anio = fecha.getFullYear();
+                var mes = fecha.getMonth() + 1;
+                var dia = fecha.getDay();
+                var hora = fecha.getHours();
+                var minutos = fecha.getMinutes();
+                return (dia + '' + mes + '' + anio + '' + hora + '' + minutos)
+            }
+            function format_day() {
+                var fecha = new Date();
+                var anio = fecha.getFullYear();
+                var mes = fecha.getMonth() + 1;
+                var dia = fecha.getDay();
+                var hora = fecha.getHours();
+                var minutos = fecha.getMinutes();
+                return (dia + '' + mes + '' + anio + '' + hora + '' + minutos)
+            }
+            function calcularTiempoDosFechas(date1, date2) {
+                var start_actual_time = new Date(date1);
+                var end_actual_time = new Date(date2);
+                var diff = end_actual_time - start_actual_time;
+                var diffSeconds = diff / 1000;
+                var HH = Math.floor(diffSeconds / 3600);
+                var MM = Math.floor(diffSeconds % 3600) / 60;
+                var HtoM = HH * 60;
+                var total = HtoM + MM;
+                return total.toFixed(0);
+            }
+            function diferenciaTiempos(date1, date2) {
+                var start_actual_time = new Date(date1);
+                var end_actual_time = new Date(date2);
+                var diff = end_actual_time - start_actual_time;
+                var diffSeconds = diff / 1000;
+                var HH = Math.floor(diffSeconds / 3600);
+                var MM = Math.floor(diffSeconds % 3600) / 60;
+                //return (HH + 'Horas y' + MM + 'Minutos');
+                return diffSeconds / 3600;
+            }
+            function format_hora(fecha) {
+                var fecha = new Date(fecha);
+                var hora = fecha.getHours();
+                return hora;
+            }
+            function format_minuto(fecha) {
+                var fecha = new Date(fecha);
+                var minutos = fecha.getMinutes();
+                return minutos;
+            }
+            function format_dia(fecha) {
+                var fecha = new Date(fecha);
+                var day = fecha.getDay();
+                return day;
+            }
+        </script>
+    </body>
+</html>
